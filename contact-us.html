@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #4CD964; /* The bright green color from your image */
+            padding: 20px;
+        }
+        
+        /* Header styles */
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Team grid layout */
+        .team-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Team member card */
+        .team-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .team-card h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .team-card h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        
+        .team-card p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .team-card .role {
+            font-weight: 350;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .team-card .details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Footer styles */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .team-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Add some subtle animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="header fade-in">
+        <h1>📞 Contact Us 📞</h1>
+        <p>For Any Queries & Suggestions Contact Us. We Are Happy To Help.</p>
+    </div>
+    
+    <div class="team-container" id="team-cards">
+        <!-- Cards will be dynamically generated with JavaScript -->
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2025 KARE Team. All rights reserved.</p>
+    </div>
+
+    <script>
+        // Team member data
+        const teamMembers = [
+            {
+                name: "N. Siddhartha Kumar Raju",
+                role: "Computer Science and Engineering",
+                rollNo: "99220040647",
+                institution: "KARE",
+                delay: 0
+            },
+            {
+                name: "K. Srinu",
+                role: "Electronics and Communication Engineering",
+                rollNo: "9922006009",
+                institution: "KARE",
+                delay: 100
+            },
+            {
+                name: "M. Homnaadda",
+                role: "Computer Science and Engineering",
+                rollNo: "99220040642",
+                institution: "KARE",
+                delay: 200
+            },
+            {
+                name: "J. Siva Nandini",
+                role: "Electronics and Communication Engineering",
+                rollNo: "9823006003",
+                institution: "KARE",
+                delay: 300
+            },
+            {
+                name: "N. Bhanu Teja Reddy",
+                role: "Computer Science and Engineering",
+                rollNo: "99220040661",
+                institution: "KARE",
+                delay: 400
+            },
+            {
+                name: "Dr. Anitha Ponraj",
+                role: "Faculty Instructor/Guide",
+                department: "Department of Computer Science and Engineering",
+                institution: "KARE",
+                isInstructor: true,
+                delay: 500
+            }
+        ];
+        
+        // Generate team cards dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            const teamContainer = document.getElementById('team-cards');
+            
+            teamMembers.forEach(member => {
+                const card = document.createElement('div');
+                card.className = 'team-card fade-in';
+                card.style.animationDelay = `${member.delay}ms`;
+                
+                if (member.isInstructor) {
+                    card.innerHTML = `
+                        <h3>${member.name}</h3>
+                        <h4>${member.role}</h4>
+                        <p class="role">${member.department}, ${member.institution}</p>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <h3>${member.name}</h3>
+                        <p class="role">Hi, I am ${member.name.split(' ').pop()}. Currently pursuing ${member.role} at ${member.institution}.</p>
+                        <div class="details">
+                            <p>Roll No: ${member.rollNo}</p>
+                        </div>
+                    `;
+                }
+                
+                teamContainer.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>
