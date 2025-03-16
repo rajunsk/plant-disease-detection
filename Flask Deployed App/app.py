@@ -6,14 +6,26 @@ import CNN
 import numpy as np
 import torch
 import pandas as pd
+import io
 
 
 disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
 supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
 
 model = CNN.CNN(39)    
-model_path = "https://drive.google.com/file/d/1QRLcceLPKax9cdUlJW59853i-dYqZqTw/view?usp=sharing"
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+file_id = "1QRLcceLPKax9cdUlJW59853i-dYqZqTw"
+drive_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+print("Loading model from Google Drive...")
+response = requests.get(drive_url, stream=True)
+response.raise_for_status()  # Ensure we got the file
+
+# Convert to in-memory file
+model_data = io.BytesIO(response.content)
+
+# Load the model directly from memory
+model = CNN.CNN(39)
+model.load_state_dict(torch.load(model_data, map_location=torch.device('cpu')))
+model.eval()
 model.eval()
 
 def prediction(image_path):
