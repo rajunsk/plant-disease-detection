@@ -26,7 +26,6 @@ model_data = io.BytesIO(response.content)
 model = CNN.CNN(39)
 model.load_state_dict(torch.load(model_data, map_location=torch.device('cpu')))
 model.eval()
-model.eval()
 
 def prediction(image_path):
     image = Image.open(image_path)
