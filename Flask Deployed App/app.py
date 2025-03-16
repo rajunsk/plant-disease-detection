@@ -16,6 +16,7 @@ disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
 supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
 
 model = CNN.CNN(39)    
+
 FILE_ID = "1QRLcceLPKax9cdUlJW59853i-dYqZqTw"
 GDRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
