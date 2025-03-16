@@ -7,26 +7,43 @@ import numpy as np
 import torch
 import pandas as pd
 import io
+import torchvision.transforms.functional as TF
+
 
 
 disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
 supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
 
 model = CNN.CNN(39)    
+# Google Drive file ID
 file_id = "1QRLcceLPKax9cdUlJW59853i-dYqZqTw"
-drive_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-print("Loading model from Google Drive...")
-response = requests.get(drive_url, stream=True)
-response.raise_for_status()  # Ensure we got the file
 
-# Convert to in-memory file
-model_data = io.BytesIO(response.content)
+# Google Drive file download URL (bypassing Google restrictions)
+def download_model_from_gdrive(file_id):
+    URL = "https://drive.google.com/uc?export=download"
 
-# Load the model directly from memory
+    with requests.Session() as session:
+        response = session.get(URL, params={'id': file_id}, stream=True)
+        response.raise_for_status()
+
+        # Handle Google Drive's large file confirmation
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                response = session.get(URL, params={'id': file_id, 'confirm': value}, stream=True)
+
+        # Read the file content into memory
+        model_data = io.BytesIO(response.content)
+        return model_data
+
+# Load model from Google Drive
+print("Downloading model from Google Drive...")
+model_data = download_model_from_gdrive(file_id)
+print("Model downloaded successfully!")
+
+# Initialize model
 model = CNN.CNN(39)
 model.load_state_dict(torch.load(model_data, map_location=torch.device('cpu')))
 model.eval()
-
 def prediction(image_path):
     image = Image.open(image_path)
     image = image.resize((224, 224))
