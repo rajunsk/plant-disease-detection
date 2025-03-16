@@ -15,26 +15,25 @@ disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
 supplement_info = pd.read_csv('supplement_info.csv',encoding='cp1252')
 
 model = CNN.CNN(39)    
-# Google Drive file ID
-file_id = "1QRLcceLPKax9cdUlJW59853i-dYqZqTw"
+FILE_ID = "1QRLcceLPKax9cdUlJW59853i-dYqZqTw"
+GDRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
-# Google Drive file download URL (bypassing Google restrictions)
-def download_model_from_gdrive(file_id):
-    URL = "https://drive.google.com/uc?export=download"
+def load_model_from_drive():
+    print("Downloading model from Google Drive...")
+    
+    # Download the model file
+    model_path = "plant_disease_model_1_latest.pt"
+    gdown.download(GDRIVE_URL, model_path, quiet=False)
 
-    with requests.Session() as session:
-        response = session.get(URL, params={'id': file_id}, stream=True)
-        response.raise_for_status()
+    # Load the model into memory
+    model = CNN.CNN(39)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.eval()
+    print("Model loaded successfully!")
+    return model
 
-        # Handle Google Drive's large file confirmation
-        for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
-                response = session.get(URL, params={'id': file_id, 'confirm': value}, stream=True)
-
-        # Read the file content into memory
-        model_data = io.BytesIO(response.content)
-        return model_data
-
+# Load model at startup
+model = load_model_from_drive()
 # Load model from Google Drive
 print("Downloading model from Google Drive...")
 model_data = download_model_from_gdrive(file_id)
