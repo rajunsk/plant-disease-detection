@@ -1,87 +1,359 @@
-{% extends 'base.html' %}
-{% block pagetitle %}
-{{title}}
-{% endblock pagetitle %}
-{% block body %}
+{% extends "base.html" %}
+{% block title %}Result: {{ title }} — PlantGuard AI{% endblock %}
 
-<div>
-  <div class="container">
-    <!-- For demo purpose -->
-    <div class="row mb-5 text-center text-white">
-      <div class="col-lg-10 mx-auto">
-        <h1 class="display-4" style="padding-top: 2%;font-weight: 400;color: rgb(4, 54, 4);""><b>{{title}}🍂</b></h1>
+{% block extra_head %}
+<style>
+  .result-section { padding: 3rem 2rem; }
+  .result-inner   { max-width: 1000px; margin: 0 auto; }
+
+  /* Breadcrumb */
+  .breadcrumb { font-size: .85rem; color: var(--text-muted); margin-bottom: 1.75rem; }
+  .breadcrumb a { color: var(--green-main); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { margin: 0 .4rem; }
+
+  /* Result hero card */
+  .result-hero {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .result-hero-left { padding: 2.5rem; }
+  .result-hero-right {
+    background: var(--off-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border-left: 1px solid var(--gray-100);
+    gap: 1rem;
+  }
+  .result-hero-right img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    box-shadow: var(--shadow-sm);
+  }
+  .result-label {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    margin-bottom: .5rem;
+  }
+  .result-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.7rem;
+    color: var(--text-main);
+    letter-spacing: -.02em;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  .result-title.healthy { color: var(--green-mid); }
+
+  /* Confidence bar */
+  .conf-row { margin-bottom: 1.25rem; }
+  .conf-label {
+    font-size: .85rem;
+    color: var(--text-muted);
+    margin-bottom: .35rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .conf-label strong { color: var(--text-main); font-size: 1rem; }
+  .conf-bar-bg {
+    height: 10px;
+    background: var(--gray-100);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .conf-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--green-main);
+    transition: width 1s ease;
+  }
+  .conf-bar-fill.warn { background: var(--amber); }
+  .conf-warn {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-sm);
+    padding: .6rem 1rem;
+    font-size: .85rem;
+    color: #92400e;
+    margin-top: .75rem;
+  }
+
+  /* Meta chips */
+  .meta-row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+
+  /* Top-K */
+  .topk { margin-bottom: 2rem; }
+  .topk-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: .75rem;
+  }
+  .topk-list { display: flex; flex-direction: column; gap: .5rem; }
+  .topk-item {
+    background: var(--off-white);
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius-sm);
+    padding: .6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .88rem;
+  }
+  .topk-item:first-child { border-color: var(--green-main); background: var(--green-pale); }
+  .topk-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .topk-item:first-child .topk-rank { background: var(--green-main); color: var(--white); }
+  .topk-name { flex: 1; color: var(--text-main); font-weight: 500; }
+  .topk-conf { color: var(--text-muted); font-size: .82rem; font-weight: 600; }
+
+  /* Info cards */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .info-card {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-100);
+  }
+  .info-card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .info-card p, .info-card li {
+    color: var(--text-muted);
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+  .info-card ul { padding-left: 1.2rem; }
+  .info-card li { margin-bottom: .3rem; }
+
+  /* Supplement */
+  .supp-card {
+    background: var(--green-dark);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+  }
+  .supp-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,.08);
+    padding: .5rem;
+    flex-shrink: 0;
+  }
+  .supp-info h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--white);
+    margin-bottom: .35rem;
+  }
+  .supp-info p { color: rgba(255,255,255,.6); font-size: .88rem; margin-bottom: 1rem; }
+  .supp-buy {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-weight: 700;
+    padding: .55rem 1.4rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: all .2s;
+    display: inline-block;
+  }
+  .supp-buy:hover { background: #62d48f; }
+
+  /* Uploaded image preview */
+  .uploaded-preview {
+    text-align: center;
+    padding: .75rem;
+  }
+  .uploaded-preview img {
+    max-height: 180px;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--gray-100);
+    object-fit: cover;
+  }
+  .uploaded-preview p { font-size: .78rem; color: var(--text-muted); margin-top: .4rem; }
+
+  /* Actions */
+  .action-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  @media (max-width: 768px) {
+    .result-hero  { grid-template-columns: 1fr; }
+    .info-grid    { grid-template-columns: 1fr; }
+    .supp-card    { flex-direction: column; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="result-section">
+  <div class="result-inner fade-up">
+
+    <div class="breadcrumb">
+      <a href="/">Home</a><span>›</span>
+      <a href="/index">Diagnose</a><span>›</span>
+      Result
+    </div>
+
+    <!-- MAIN RESULT CARD -->
+    <div class="result-hero">
+      <div class="result-hero-left">
+        <p class="result-label">Diagnosis result</p>
+        <h1 class="result-title {% if 'healthy' in title.lower() %}healthy{% endif %}">
+          {{ title | replace('_', ' ') | replace(':', ' — ') }}
+        </h1>
+
+        <!-- Confidence bar -->
+        <div class="conf-row">
+          <div class="conf-label">
+            <span>Model confidence</span>
+            <strong>{{ confidence }}%</strong>
+          </div>
+          <div class="conf-bar-bg">
+            <div class="conf-bar-fill {% if low_conf %}warn{% endif %}"
+                 style="width: {{ confidence }}%"></div>
+          </div>
+          {% if low_conf %}
+          <div class="conf-warn">
+            ⚠️ Low confidence ({{ confidence }}%). The model is uncertain — try uploading a clearer photo with better lighting.
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="meta-row">
+          <span class="badge {% if 'healthy' in title.lower() %}badge-green{% else %}badge-red{% endif %}">
+            {% if 'healthy' in title.lower() %}✅ Healthy{% else %}🔴 Disease Detected{% endif %}
+          </span>
+          <span class="badge badge-green">⚡ {{ inference_ms }} ms</span>
+          <span class="badge badge-amber">🧠 CNN Deep Learning</span>
+        </div>
+      </div>
+
+      <div class="result-hero-right">
+        {% if uploaded_image %}
+        <div class="uploaded-preview">
+          <img src="{{ uploaded_image }}" alt="Uploaded leaf"/>
+          <p>Your uploaded image</p>
+        </div>
+        {% endif %}
+        {% if image_url %}
+        <div class="uploaded-preview">
+          <img src="{{ image_url }}" alt="{{ title }}"/>
+          <p>Reference image</p>
+        </div>
+        {% endif %}
       </div>
     </div>
-    <center>
-    <div class=" col">
-          <div class="p-3 bg-white shadow rounded-lg" style="width: 30%;">
 
-            <img src={{image_url}} width="350" height="350">
-
-          </div>
-      </div>
-      </center>
-      <br>
-      <div class=" row ">
-        <div class="col mx-auto">
-          <div class="p-5 bg-white shadow rounded-lg" style="height: 95%;">
-
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Tips to Grow Healthy Plants :
-                {% else %}
-                Brief Descritpion :
-                {% endif %}
-              </b></h5>
-            <p>{{desc}}
-            </p>
-          </div>
+    <!-- TOP-K PREDICTIONS -->
+    {% if top_k and top_k|length > 1 %}
+    <div class="topk">
+      <p class="topk-title">📊 Top {{ top_k|length }} predictions</p>
+      <div class="topk-list">
+        {% for item in top_k %}
+        <div class="topk-item">
+          <div class="topk-rank">{{ loop.index }}</div>
+          <span class="topk-name">{{ item.disease_name | replace('_', ' ') | replace(':', ' — ') }}</span>
+          <span class="topk-conf">{{ item.confidence }}%</span>
         </div>
+        {% endfor %}
       </div>
-      <div class="row">
-        <div class="col mx-auto">
-          <div class="p-5 bg-white shadow rounded-lg" style="height:95%">
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Benefits :
-                {% else %}
-                Prevent This Plant Disease By follow below steps :
-                {% endif %}
-              </b></h5>
-            <p>
-              {{prevent}}
-            </p>
-          </div>
-        </div>
+    </div>
+    {% endif %}
 
-        {% if pred!=4 %}
-        <div class="col mx-auto"">
-        <div class=" p-5 bg-white shadow rounded-lg" style="height: 95%;">
-          <center>
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Fertilizer :
-                {% else %}
-                Supplements :
-                {% endif %}
-              </b></h5>
-            <br>
-            <img src={{simage}} width="300" height="350">
-            <br>
-            <br>
-            <h6>{{sname}}</h6>
-
-            <a target="_blank" href={{buy_link}}><button type="button" class="btn btn-success"
-                style="background-color: #05380b;">Buy Product</button></a>
-          </center>
-        </div>
+    <!-- DISEASE INFO -->
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-title">📋 About this condition</div>
+        <p>{{ desc }}</p>
       </div>
+      <div class="info-card">
+        <div class="info-card-title">🛡️ Possible treatment steps</div>
+        {% set steps = prevent.split('.') if prevent else [] %}
+        {% if steps|length > 1 %}
+        <ul>
+          {% for step in steps %}
+            {% if step.strip() %}<li>{{ step.strip() }}.</li>{% endif %}
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>{{ prevent }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SUPPLEMENT -->
+    {% if sname %}
+    <div class="supp-card">
+      {% if simage %}
+      <img class="supp-img" src="{{ simage }}" alt="{{ sname }}" onerror="this.style.display='none'"/>
       {% endif %}
-
+      <div class="supp-info">
+        <p style="color:rgba(255,255,255,.45);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.25rem;">Recommended supplement</p>
+        <h3>{{ sname }}</h3>
+        <p>Recommended treatment product for this condition. Always follow label instructions.</p>
+        {% if buy_link and buy_link != '#' %}
+        <a href="{{ buy_link }}" class="supp-buy" target="_blank" rel="noopener">🛒 Buy Now →</a>
+        {% endif %}
+      </div>
     </div>
+    {% endif %}
+
+    <!-- ACTIONS -->
+    <div class="action-row">
+      <a href="/index"  class="btn btn-primary">📸 Diagnose Another Leaf</a>
+      <a href="/market" class="btn btn-outline">🛒 Browse All Treatments</a>
+      <a href="/history"class="btn btn-outline">📜 View History</a>
+    </div>
+
   </div>
-</div>
-{% endblock body %}
+</section>
+
+<script>
+  // Animate confidence bar on load
+  window.addEventListener('load', () => {
+    const bar = document.querySelector('.conf-bar-fill');
+    if (bar) { bar.style.width = bar.style.width; }
+  });
+</script>
+{% endblock %}
