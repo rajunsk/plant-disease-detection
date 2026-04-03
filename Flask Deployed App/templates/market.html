@@ -1,43 +1,212 @@
-{% extends 'base.html' %}
-{% block pagetitle %}
-Supplement Market
-{% endblock pagetitle %}
+{% extends "base.html" %}
+{% block title %}Treatment Market — PlantGuard AI{% endblock %}
 
-{% block body %}
+{% block extra_head %}
+<style>
+  .market-section { padding: 4rem 2rem; }
+  .market-inner   { max-width: 1200px; margin: 0 auto; }
+  .market-header  { margin-bottom: 2.5rem; }
 
-<br>
-<div class="row mb-5 text-center text-white">
-    <div class="col-lg-10 mx-auto">
-        <h1 class="display-4" style="padding-top: 2%;font-weight: 400;color: rgb(4, 54, 4);"><b>🛒Supplements🛒</b></h1>
-        <p class="lead" style="font-weight: 500;color: black;">Buy Supplements & Fertilizer at one place</p>
+  /* Search + filter */
+  .market-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: .65rem 1rem .65rem 2.5rem;
+    border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: .9rem;
+    background: var(--white);
+    color: var(--text-main);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .search-box input:focus { border-color: var(--green-main); }
+  .search-icon {
+    position: absolute;
+    left: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+    font-size: .9rem;
+  }
+  #count-label { font-size: .88rem; color: var(--text-muted); white-space: nowrap; }
+
+  /* Grid */
+  .market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.5rem;
+  }
+  .market-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--gray-100);
+    box-shadow: var(--shadow-sm);
+    transition: all .22s;
+    display: flex;
+    flex-direction: column;
+  }
+  .market-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--green-light); }
+  .card-img-wrap {
+    background: var(--off-white);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--gray-100);
+    padding: 1rem;
+  }
+  .card-img-wrap img {
+    max-height: 140px;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform .3s;
+  }
+  .market-card:hover .card-img-wrap img { transform: scale(1.05); }
+  .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+  .card-disease {
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    margin-bottom: .4rem;
+  }
+  .card-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text-main);
+    margin-bottom: auto;
+    line-height: 1.35;
+  }
+  .card-footer {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+  }
+  .buy-btn {
+    flex: 1;
+    text-align: center;
+    background: var(--green-main);
+    color: var(--white);
+    padding: .55rem .9rem;
+    border-radius: var(--radius-sm);
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .18s;
+  }
+  .buy-btn:hover { background: var(--green-mid); }
+
+  /* Empty state */
+  #empty-state {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+  #empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+  @media (max-width: 600px) {
+    .market-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 400px) {
+    .market-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="market-section">
+  <div class="market-inner fade-up">
+    <div class="market-header">
+      <h1 class="section-head">🛒 Treatment Marketplace</h1>
+      <p class="section-sub">Recommended supplements and fungicides for every disease category</p>
     </div>
-</div>
-<div class="row p-3">
-    {% for index in range(0,supplement_name | length) %}
-    {% if index != 4 %}
-    <div class="col">
-        <div class=" p-5 bg-white shadow rounded-lg" style="height: 95%;">
-        <center>
-            {% if index==3 or index==5 or index==7 or index==11 or index==15 or index==18 or index==20 or
-            index==23 or
-            index==24 or index==25 or index==28 or index==38 %}
-            <h5>Fertilizer<b style="color: green;"> (Healthy):</b></h5>
+
+    <div class="market-controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search disease or supplement…" oninput="filterCards()"/>
+      </div>
+      <span id="count-label"></span>
+    </div>
+
+    <div class="market-grid" id="market-grid">
+      {% for i in range(supplement_name|length) %}
+      {% set sname  = supplement_name[i] %}
+      {% set simage = supplement_image[i] %}
+      {% set dname  = disease[i] %}
+      {% set blink  = buy[i] %}
+      {% if sname %}
+      <div class="market-card"
+           data-search="{{ sname|lower }} {{ dname|lower }}">
+        <div class="card-img-wrap">
+          <img src="{{ simage }}"
+               alt="{{ sname }}"
+               onerror="this.src='https://via.placeholder.com/140x140?text=No+Image'"/>
+        </div>
+        <div class="card-body">
+          <p class="card-disease">{{ dname | replace('_', ' ') | replace('___', ' — ') }}</p>
+          <p class="card-name">{{ sname }}</p>
+          <div class="card-footer">
+            {% if blink and blink != 'nan' %}
+            <a href="{{ blink }}" class="buy-btn" target="_blank" rel="noopener">🛒 Buy Now</a>
             {% else %}
-            <h5>Supplements<b style="color: red;"> (Diseased):</b></h5>
+            <span class="buy-btn" style="background:var(--gray-300);color:var(--gray-700);cursor:default;">Not Available</span>
             {% endif %}
-            <br>
-            <img src={{supplement_image[index]}} width="200" height="250">
-            <br>
-            <br>
-            <h6>For {{disease[index]}}</h6>
-            <p>{{supplement_name[index]}}</p>
-
-            <a target="_blank" href={{buy[index]}}><button type="button" class="btn btn-success"
-                    style="background-color: #05380b;">Buy Product</button></a>
-        </center>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
     </div>
-</div>
-{% endif %}
-{% endfor %}
-</div>
-{% endblock body %}
+
+    <div id="empty-state">
+      <span class="empty-icon">🌿</span>
+      <p>No products match your search.</p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  const cards = document.querySelectorAll('.market-card');
+  const countLabel = document.getElementById('count-label');
+  const emptyState = document.getElementById('empty-state');
+
+  function updateCount(n) {
+    countLabel.textContent = `Showing ${n} of ${cards.length} products`;
+  }
+
+  function filterCards() {
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    let visible = 0;
+    cards.forEach(c => {
+      const match = !q || c.dataset.search.includes(q);
+      c.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+    updateCount(visible);
+  }
+
+  updateCount(cards.length);
+</script>
+{% endblock %}
