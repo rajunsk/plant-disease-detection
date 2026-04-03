@@ -1,108 +1,363 @@
-{% extends 'base.html' %}
-{% block pagetitle %}
-Plant Disease Detection
-{% endblock pagetitle %}
-{% block body %}
+{% extends "base.html" %}
+{% block title %}PlantGuard AI — Plant Disease Detection{% endblock %}
+
+{% block extra_head %}
 <style>
-  body {
-    overflow-x: hidden;
-    background-color: transparent !important;
+  /* ── HERO ── */
+  .hero {
+    background: var(--green-dark);
+    padding: 6rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
   }
-  
-  .bg-image {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url(https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
-    background-size: cover;
-    background-position: center;
-    filter: brightness(0.85);
-    z-index: -1;
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(45,134,83,.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(77,184,122,.15) 0%, transparent 70%);
   }
-  
-  .main-container {
-    min-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    color: white;
-    text-shadow: 0px 0px 10px rgba(0,0,0,0.8);
-  }
-  
-  .content-card {
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 2rem;
-    border-radius: 15px;
-    max-width: 800px;
+  .hero-inner {
+    max-width: 1200px;
     margin: 0 auto;
-    backdrop-filter: blur(5px);
-    text-align: center;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
   }
-  
-  .action-button {
-    background-color: white;
-    color: #2c7520;
-    font-weight: bold;
-    padding: 15px 40px;
-    border-radius: 30px;
-    border: none;
-    font-size: 1.2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    margin-top: 2rem;
-    display: inline-block;
-    text-decoration: none;
+  .hero-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    margin-bottom: 1.25rem;
   }
-  
-  .action-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    background-color: #f8f8f8;
+  .hero-title em {
+    font-style: normal;
+    color: var(--green-light);
   }
-  
-  .page-title {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-  }
-  
-  .subtitle {
-    font-size: 1.3rem;
-    opacity: 0.9;
-    max-width: 600px;
-    text-align: center;
+  .hero-sub {
+    color: rgba(255,255,255,.68);
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.7;
     margin-bottom: 2rem;
   }
-  
-  @media only screen and (max-width: 830px) {
-    .warning-message {
-      display: block;
-    }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .hero-btn-main {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-weight: 700;
+    padding: .85rem 2rem;
+    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .hero-btn-main:hover { background: #62d48f; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(77,184,122,.35); }
+  .hero-btn-sec {
+    background: rgba(255,255,255,.1);
+    color: rgba(255,255,255,.85);
+    font-weight: 400;
+    padding: .85rem 1.75rem;
+    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.2);
+    transition: all .2s;
+  }
+  .hero-btn-sec:hover { background: rgba(255,255,255,.18); }
+  .hero-visual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .hero-stat-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--green-light);
+    display: block;
+    letter-spacing: -.03em;
+  }
+  .hero-stat-label { color: rgba(255,255,255,.6); font-size: .85rem; margin-top: .2rem; }
+  .hero-stat.span2 { grid-column: span 2; }
+
+  /* ── HOW IT WORKS ── */
+  .how { padding: 5rem 2rem; background: var(--white); }
+  .how-inner { max-width: 1200px; margin: 0 auto; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  .step {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: var(--radius-lg);
+    background: var(--off-white);
+    border: 1px solid var(--gray-100);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .step:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+  .step-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--green-pale);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 1.25rem;
+  }
+  .step h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: .5rem;
+    color: var(--text-main);
+  }
+  .step p { color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+  .step-num {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: .75rem;
+    color: var(--green-main);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+
+  /* ── STATS ── */
+  .stats { padding: 4rem 2rem; background: var(--green-pale); }
+  .stats-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.4rem;
+    color: var(--green-mid);
+    letter-spacing: -.03em;
+  }
+  .stat-label { color: var(--text-muted); font-size: .9rem; margin-top: .25rem; }
+
+  /* ── DISEASES COVERED ── */
+  .diseases { padding: 5rem 2rem; background: var(--off-white); }
+  .diseases-inner { max-width: 1200px; margin: 0 auto; }
+  .disease-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: 1.5rem;
+  }
+  .chip {
+    background: var(--white);
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+    padding: .3rem .85rem;
+    border-radius: 99px;
+    font-size: .82rem;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .chip:hover { border-color: var(--green-main); color: var(--green-mid); background: var(--green-pale); }
+  .chip.diseased { border-color: #fca5a5; background: #fef2f2; color: #b91c1c; }
+  .chip.healthy  { border-color: #a7f3d0; background: var(--green-pale); color: var(--green-mid); }
+
+  /* ── CTA ── */
+  .cta-band {
+    background: var(--green-mid);
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  .cta-band h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--white);
+    margin-bottom: .75rem;
+    letter-spacing: -.02em;
+  }
+  .cta-band p { color: rgba(255,255,255,.75); margin-bottom: 1.75rem; font-size: 1rem; }
+
+  @media (max-width: 768px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .steps { grid-template-columns: 1fr; }
+    .stats-inner { grid-template-columns: 1fr 1fr; }
   }
 </style>
+{% endblock %}
 
-<div class="bg-image"></div>
+{% block content %}
 
-<div class="main-container">
-  <div class="content-card">
-    <h1 class="page-title"><b>🍁 Plant Disease Detection 🍁</b></h1>
-    <p class="subtitle">This AI Engine will help you detect diseases in various fruits and vegetables using advanced image recognition technology.</p>
-    
-    <div class="text-center">
-      <a href="/index" class="action-button">Launch AI Engine</a>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner fade-up">
+    <div>
+      <div style="margin-bottom:.75rem;">
+        <span class="badge badge-green">🌿 AI-Powered Agriculture</span>
+      </div>
+      <h1 class="hero-title">Detect Plant<br>Diseases <em>Instantly</em><br>with Deep Learning</h1>
+      <p class="hero-sub">
+        Upload a leaf photo. Our custom CNN analyses it across
+        39 disease categories and returns a diagnosis with treatment
+        steps — in under 1 second.
+      </p>
+      <div class="hero-actions">
+        <a href="/index" class="hero-btn-main">📸 Diagnose a Leaf →</a>
+        <a href="/market" class="hero-btn-sec">Browse Treatments</a>
+      </div>
     </div>
-    
-    <div class="mt-5 text-center">
-      <p>Our system can analyze plants including: Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Pepper Bell, Potato, Raspberry, Soybean, Squash, Strawberry, and Tomato.</p>
-    </div>
-    
-    <div class="warning-message" style="margin-top:2rem; background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 10px; display: none;">
-      <p style="color: white; font-size: 1rem;">⚠️ For the best experience, please use a Laptop/PC. Mobile functionality may be limited.</p>
+    <div class="hero-visual">
+      <div class="hero-stat">
+        <span class="hero-stat-num">92%</span>
+        <div class="hero-stat-label">Classification accuracy</div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">39</span>
+        <div class="hero-stat-label">Disease categories</div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">&lt;1s</span>
+        <div class="hero-stat-label">Inference time</div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">14</span>
+        <div class="hero-stat-label">Plant species covered</div>
+      </div>
     </div>
   </div>
-</div>
-{% endblock body %}
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-inner">
+    <p class="section-head" style="text-align:center;">How it works</p>
+    <p class="section-sub" style="text-align:center;">Three steps from leaf to diagnosis</p>
+    <div class="steps">
+      <div class="step fade-up" style="animation-delay:.1s">
+        <div class="step-icon">📷</div>
+        <span class="step-num">Step 01</span>
+        <h3>Upload a leaf image</h3>
+        <p>Take a clear photo of the affected leaf and upload it using our simple drag-and-drop interface. JPG, PNG, and WEBP all supported.</p>
+      </div>
+      <div class="step fade-up" style="animation-delay:.2s">
+        <div class="step-icon">🧠</div>
+        <span class="step-num">Step 02</span>
+        <h3>AI analyses the image</h3>
+        <p>Our 4-block VGG-style CNN processes the image through 256 feature maps, returning the top prediction with a confidence score in milliseconds.</p>
+      </div>
+      <div class="step fade-up" style="animation-delay:.3s">
+        <div class="step-icon">💊</div>
+        <span class="step-num">Step 03</span>
+        <h3>Get diagnosis & treatment</h3>
+        <p>Receive a full disease description, step-by-step treatment guide, and recommended supplements — ready to act on immediately.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div>
+      <div class="stat-num">{{ stats.total_predictions or 0 }}+</div>
+      <div class="stat-label">Predictions made</div>
+    </div>
+    <div>
+      <div class="stat-num">39</div>
+      <div class="stat-label">Disease classes</div>
+    </div>
+    <div>
+      <div class="stat-num">92%</div>
+      <div class="stat-label">Model accuracy</div>
+    </div>
+    <div>
+      <div class="stat-num">14</div>
+      <div class="stat-label">Plants supported</div>
+    </div>
+  </div>
+</section>
+
+<!-- DISEASES COVERED -->
+<section class="diseases">
+  <div class="diseases-inner">
+    <p class="section-head">Diseases & plants covered</p>
+    <p class="section-sub">14 plant species · 27 diseases · 12 healthy classes</p>
+    <div class="disease-chips">
+      <span class="chip diseased">Apple Scab</span>
+      <span class="chip diseased">Apple Black Rot</span>
+      <span class="chip diseased">Cedar Apple Rust</span>
+      <span class="chip healthy">Apple Healthy</span>
+      <span class="chip healthy">Blueberry Healthy</span>
+      <span class="chip diseased">Cherry Powdery Mildew</span>
+      <span class="chip healthy">Cherry Healthy</span>
+      <span class="chip diseased">Corn Gray Leaf Spot</span>
+      <span class="chip diseased">Corn Common Rust</span>
+      <span class="chip diseased">Corn Northern Leaf Blight</span>
+      <span class="chip healthy">Corn Healthy</span>
+      <span class="chip diseased">Grape Black Rot</span>
+      <span class="chip diseased">Grape Black Measles</span>
+      <span class="chip diseased">Grape Leaf Blight</span>
+      <span class="chip healthy">Grape Healthy</span>
+      <span class="chip diseased">Orange Citrus Greening</span>
+      <span class="chip diseased">Peach Bacterial Spot</span>
+      <span class="chip healthy">Peach Healthy</span>
+      <span class="chip diseased">Pepper Bacterial Spot</span>
+      <span class="chip healthy">Pepper Healthy</span>
+      <span class="chip diseased">Potato Early Blight</span>
+      <span class="chip diseased">Potato Late Blight</span>
+      <span class="chip healthy">Potato Healthy</span>
+      <span class="chip healthy">Raspberry Healthy</span>
+      <span class="chip healthy">Soybean Healthy</span>
+      <span class="chip diseased">Squash Powdery Mildew</span>
+      <span class="chip diseased">Strawberry Leaf Scorch</span>
+      <span class="chip healthy">Strawberry Healthy</span>
+      <span class="chip diseased">Tomato Bacterial Spot</span>
+      <span class="chip diseased">Tomato Early Blight</span>
+      <span class="chip diseased">Tomato Late Blight</span>
+      <span class="chip diseased">Tomato Leaf Mold</span>
+      <span class="chip diseased">Tomato Septoria Leaf Spot</span>
+      <span class="chip diseased">Tomato Spider Mites</span>
+      <span class="chip diseased">Tomato Target Spot</span>
+      <span class="chip diseased">Tomato Yellow Leaf Curl</span>
+      <span class="chip diseased">Tomato Mosaic Virus</span>
+      <span class="chip healthy">Tomato Healthy</span>
+      <span class="chip">No Leaf Detected</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+  <h2>Ready to diagnose your crop?</h2>
+  <p>Upload a leaf image and get results in under a second — completely free.</p>
+  <a href="/index" class="hero-btn-main">📸 Start Diagnosis →</a>
+</section>
+
+{% endblock %}
