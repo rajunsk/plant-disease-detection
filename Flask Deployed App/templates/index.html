@@ -1,241 +1,262 @@
-<html>
-{% extends 'base.html' %}
-{% block pagetitle %}
-AI Engine
-{% endblock pagetitle %}
+{% extends "base.html" %}
+{% block title %}Diagnose — PlantGuard AI{% endblock %}
 
-{% block body %}
-<div>
-    <div class="container">
-        <!-- For demo purpose -->
-        <div class="row mb-5 text-center text-white">
-            <div class="col-lg-10 mx-auto">
-                <h1 class="display-4" style="padding-top: 2%;font-weight: 400;color: rgb(4, 54, 4);"><b>🍀AI
-                        Engine🍀</b></h1>
-                <p class="lead" style="font-weight: 500;color: black;">Let AI Engine Will Help You To Detect Disease</p>
-            </div>
+{% block extra_head %}
+<style>
+  .upload-section {
+    padding: 4rem 2rem;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+  }
+  .upload-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .upload-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-100);
+  }
+  .upload-header { text-align: center; margin-bottom: 2.5rem; }
+  .upload-header h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--text-main);
+    letter-spacing: -.02em;
+    margin-bottom: .5rem;
+  }
+  .upload-header p { color: var(--text-muted); font-size: .95rem; }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-md);
+    padding: 3.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    background: var(--off-white);
+    margin-bottom: 1.5rem;
+  }
+  .drop-zone:hover,
+  .drop-zone.dragover {
+    border-color: var(--green-main);
+    background: var(--green-pale);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .drop-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+  .drop-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: .4rem;
+  }
+  .drop-sub { color: var(--text-muted); font-size: .88rem; }
+  .drop-sub strong { color: var(--green-main); }
+
+  /* Preview */
+  #preview-wrap {
+    display: none;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  #preview-wrap img {
+    max-height: 240px;
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--gray-100);
+    object-fit: cover;
+  }
+  #file-name {
+    margin-top: .5rem;
+    font-size: .85rem;
+    color: var(--text-muted);
+  }
+
+  /* Submit btn */
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background: var(--green-main);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-display);
+    letter-spacing: .01em;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+  }
+  .submit-btn:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .submit-btn:disabled { background: var(--gray-300); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Loading overlay */
+  #loading {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,51,32,.75);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--white);
+  }
+  #loading.show { display: flex; }
+  .spinner {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(255,255,255,.25);
+    border-top-color: var(--green-light);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { font-family: var(--font-display); font-size: 1.1rem; opacity: .85; }
+
+  /* Tips */
+  .tips {
+    margin-top: 2rem;
+    background: var(--green-pale);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    border-left: 4px solid var(--green-main);
+  }
+  .tips h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--green-mid);
+    margin-bottom: .6rem;
+  }
+  .tips ul { list-style: none; padding: 0; }
+  .tips li {
+    color: var(--text-muted);
+    font-size: .87rem;
+    padding: .2rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+  }
+  .tips li::before { content: '✓'; position: absolute; left: 0; color: var(--green-main); font-weight: 700; }
+
+  /* Mobile */
+  .mobile-warn {
+    display: none;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: .88rem;
+    color: #92400e;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    .upload-card { padding: 1.75rem 1.25rem; }
+    .mobile-warn { display: block; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="loading"><div class="spinner"></div><p>Analysing leaf image…</p></div>
+
+<section class="upload-section">
+  <div class="upload-inner fade-up">
+    <div class="upload-card">
+      <div class="upload-header">
+        <h1>🔬 Leaf Diagnosis</h1>
+        <p>Upload a clear photo of the affected leaf for instant AI-powered disease detection.</p>
+      </div>
+
+      <div class="mobile-warn">
+        📱 For best results on mobile, ensure the leaf fills most of the frame before uploading.
+      </div>
+
+      <form method="POST" action="/submit" enctype="multipart/form-data" id="upload-form">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" name="image" id="file-input" accept=".jpg,.jpeg,.png,.webp,.bmp" required/>
+          <span class="drop-icon">🌿</span>
+          <p class="drop-title">Drop your leaf image here</p>
+          <p class="drop-sub">or <strong>click to browse</strong> — JPG, PNG, WEBP, BMP up to 10 MB</p>
         </div>
-        <!-- End -->
-        <div class="row ">
-            <div class="col mx-auto">
-                <div class="p-5 bg-white shadow rounded-lg" style="height: 95%;">
 
-                    <h5><b>Why is it necessary to detect disease in plant ?</b></h5>
-                    <p>Plant diseases affect the growth of their respective species. In addition, some research gaps are
-                        identified from which to obtain greater transparency for detecting diseases in plants, even
-                        before their symptoms appear clearly.
-                        diagnosis is one of the most important aspects of a plant pathologist's training. Without proper
-                        identification of the disease and the disease-causing agent, disease control measures can be a
-                        waste of time and money and can lead to further plant losses. Proper disease diagnosis is
-                        necessary.
-                    </p>
-                </div>
-            </div>
-            <div class="col mx-auto">
-                <div class="p-5 bg-white shadow rounded-lg" style="height: 95%;"><img
-                        src="https://www.pngjoy.com/pngl/250/4840262_plants-png-indoors-tropical-plant-png-hd-png.png "
-                        height="300" alt="" width="200" class="d-block mx-auto mb-4 rounded-pill">
-
-                    <!-- Default bootstrap file upload-->
-
-                    <form action="/submit" method="POST" enctype="multipart/form-data">
-                        <div class="custom-file overflow-hidden mb-4">
-                            <input type="file" id="actual-btn" hidden name="image" />
-                            <label for="actual-btn">Choose File</label>
-                            <label id="camera-btn">Open Camera</label>
-
-                            </br>
-                            <span id="file-chosen">No file chosen</span>
-                        </div>
-
-                        <!-- Camera feed container (hidden initially) -->
-                        <div id="camera-container" style="display: none;">
-                            <video id="camera-feed" width="320" height="240" autoplay></video>
-                            <button type="button" id="capture-btn">Capture Photo</button>
-                        </div>
-
-                        <!-- Preview Image (will show the captured photo) -->
-                        <img id="preview" src="#" alt="Camera Photo Preview" style="display: none; max-width: 100%;" />
-
-
-                        <!-- End -->
-
-                        <h6 class="text-center mb-4 text-muted">
-                            Simply upload your plant's leaf image and then see the magic of AI.
-                        </h6>
-
-                        <!-- Custom bootstrap upload file-->
-                        <center>
-                            <a class="mx-2"><button type="submit" class="btn btn-outline-success">Submit</button></a>
-                        </center>
-                    </form>
-                    <!-- End -->
-
-                </div>
-            </div>
-            <div class="col mx-auto">
-                <div class="p-5 bg-white shadow rounded-lg" style="height: 95%;">
-                    <h5><b>Prevent Plant Disease follow below steps:</b></h5>
-                    <ol>
-                        <li>Follow Good Sanitation Practices.</li>
-                        <li>Fertilize to Keep Your Plants Healthy.</li>
-                        <li>Inspect Plants for Diseases Before You Bring Them Home.</li>
-                        <li>Allow the Soil to Warm Before Planting.</li>
-                        <li>Ensure a Healthy Vegetable Garden By Rotating Crops.</li>
-                        <li>Provide Good Air Circulation</li>
-                        <li>Remove Diseased Stems and Foliage</li>
-                    </ol>
-                    <a target="_blank" href="https://www.thespruce.com/prevent-plant-diseases-in-your-garden-2539511"
-                        class="mx-2"><button type="button" class="btn btn-outline-success">More info</button></a>
-                </div>
-            </div>
+        <div id="preview-wrap">
+          <img id="preview-img" src="" alt="Preview"/>
+          <p id="file-name"></p>
         </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn" disabled>
+          🔍 Analyse Leaf
+        </button>
+      </form>
+
+      <div class="tips">
+        <h4>📌 Tips for best results</h4>
+        <ul>
+          <li>Photograph a single leaf with the affected area clearly visible</li>
+          <li>Use natural light — avoid dark or blurry photos</li>
+          <li>Keep the leaf flat and fill the frame</li>
+          <li>Avoid backgrounds that are the same colour as the leaf</li>
+        </ul>
+      </div>
     </div>
-</div>
+  </div>
+</section>
 
 <script>
-    const actualBtn = document.getElementById('actual-btn');
-    const captureBtn = document.getElementById('capture-btn');
+  const fileInput  = document.getElementById('file-input');
+  const dropZone   = document.getElementById('drop-zone');
+  const previewWrap= document.getElementById('preview-wrap');
+  const previewImg = document.getElementById('preview-img');
+  const fileName   = document.getElementById('file-name');
+  const submitBtn  = document.getElementById('submit-btn');
+  const form       = document.getElementById('upload-form');
+  const loading    = document.getElementById('loading');
 
-    const fileChosen = document.getElementById('file-chosen');
+  function showPreview(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      previewImg.src = e.target.result;
+      previewWrap.style.display = 'block';
+      fileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+      submitBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+  }
 
-    actualBtn.addEventListener('change', function () {
-        fileChosen.textContent = this.files[0].name
-    })
+  fileInput.addEventListener('change', () => showPreview(fileInput.files[0]));
 
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) { fileInput.files = e.dataTransfer.files; showPreview(file); }
+  });
 
-    let capturedFile = null; // Variable to hold the captured file
-
-    document.getElementById('camera-btn').addEventListener('click', function () {
-        // Show the camera container
-        document.getElementById('camera-container').style.display = 'block';
-
-        // Start the camera feed
-        startCamera();
-    });
-
-    // Start the camera feed using the getUserMedia API
-    function startCamera() {
-        const cameraFeed = document.getElementById('camera-feed');
-
-        // Request access to the user's camera
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-                // Set the camera feed source to the stream
-                cameraFeed.srcObject = stream;
-            })
-            .catch(function (error) {
-                console.log('Error accessing the camera: ', error);
-            });
-    }
-
-    // Capture photo from the camera feed
-    document.getElementById('capture-btn').addEventListener('click', function () {
-        const cameraFeed = document.getElementById('camera-feed');
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Set canvas dimensions to match the video feed dimensions
-        canvas.width = cameraFeed.videoWidth;
-        canvas.height = cameraFeed.videoHeight;
-
-        // Draw the current frame from the video feed onto the canvas
-        ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
-
-        // Convert the canvas image to a data URL
-        const dataUrl = canvas.toDataURL('image/jpeg');
-
-        // Create a new file from the data URL
-        const imageBlob = dataURItoBlob(dataUrl);
-        capturedFile = new File([imageBlob], "camera_image.jpg", { type: 'image/jpeg' });
-
-        // Now you have a file object that you can use locally
-        document.getElementById('file-chosen').textContent = capturedFile.name;
-
-        // Show the captured image preview
-        const preview = document.getElementById('preview');
-        preview.src = dataUrl;
-        preview.style.display = 'block'; // Show the preview
-    });
-
-    // Helper function to convert data URL to Blob
-    function dataURItoBlob(dataURI) {
-        const byteString = atob(dataURI.split(',')[1]);
-        const arrayBuffer = new ArrayBuffer(byteString.length);
-        const uintArray = new Uint8Array(arrayBuffer);
-        for (let i = 0; i < byteString.length; i++) {
-            uintArray[i] = byteString.charCodeAt(i);
-        }
-        return new Blob([uintArray], { type: 'image/jpeg' });
-    }
-
-    // Set up the "Choose File" input to trigger when the image is captured
-    document.getElementById('actual-btn').addEventListener('click', function () {
-        // Use the captured image file as the input file for form submission
-        if (capturedFile) {
-            const dataTransfer = new DataTransfer(); // Create a DataTransfer object
-            dataTransfer.items.add(capturedFile); // Add the captured file to the DataTransfer object
-            document.getElementById('actual-btn').files = dataTransfer.files; // Assign the file to the input
-        }
-    });
-
-
-
-
-    // Start the camera feed
-    async function startCamera() {
-        const videoElement = document.getElementById('camera-feed');
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
-        } catch (err) {
-            console.error('Error accessing the camera: ', err);
-        }
-    }
-
-    // Capture the image from the video feed
-    document.getElementById('capture-btn').addEventListener('click', function () {
-        const video = document.getElementById('camera-feed');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-
-        // Set canvas size equal to video size
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // Draw the video frame onto the canvas
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert the image to a data URL and create a file input
-        const dataUrl = canvas.toDataURL('image/png');
-        const fileInput = document.getElementById('captured-image');
-        const file = dataUrlToFile(dataUrl, 'captured-image.png');
-
-        // Create a File object from the base64 image data
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        fileInput.files = dataTransfer.files;
-
-        // Hide the camera feed and display the chosen file text
-        document.getElementById('camera-container').style.display = 'none';
-        document.getElementById('file-chosen').innerText = 'Image Captured';
-    });
-
-    // Convert base64 image data to a file object
-    function dataUrlToFile(dataUrl, filename) {
-        const arr = dataUrl.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        const n = bstr.length;
-        const u8arr = new Uint8Array(n);
-
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-
-        return new File([u8arr], filename, { type: mime });
-    }
-
+  form.addEventListener('submit', () => loading.classList.add('show'));
 </script>
-
-{% endblock body %}
+{% endblock %}
