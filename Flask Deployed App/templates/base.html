@@ -1,190 +1,224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}PlantGuard AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green-dark:  #0d3320;
+      --green-mid:   #1a5c38;
+      --green-main:  #2d8653;
+      --green-light: #4db87a;
+      --green-pale:  #e8f5ee;
+      --amber:       #f0a500;
+      --red-soft:    #e05050;
+      --white:       #ffffff;
+      --off-white:   #f7faf8;
+      --gray-100:    #eef2ef;
+      --gray-300:    #c8d4cc;
+      --gray-500:    #7a9282;
+      --gray-700:    #3d5245;
+      --text-main:   #0d2018;
+      --text-muted:  #4a6657;
+      --radius-sm:   6px;
+      --radius-md:   12px;
+      --radius-lg:   20px;
+      --shadow-sm:   0 1px 4px rgba(13,50,32,.08);
+      --shadow-md:   0 4px 20px rgba(13,50,32,.12);
+      --shadow-lg:   0 12px 40px rgba(13,50,32,.18);
+      --font-display:'Syne', sans-serif;
+      --font-body:   'DM Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--off-white);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 16px;
+      line-height: 1.6;
+    }
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-    
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/bttn.css/0.2.4/bttn.css">
+    /* ── NAV ── */
+    nav {
+      background: var(--green-dark);
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .nav-logo span { color: var(--green-light); }
+    .nav-links { display: flex; gap: .25rem; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,.72);
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 400;
+      padding: .4rem .85rem;
+      border-radius: var(--radius-sm);
+      transition: all .2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--white); background: rgba(255,255,255,.1); }
+    .nav-cta {
+      background: var(--green-light) !important;
+      color: var(--green-dark) !important;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { background: #62d48f !important; }
 
-    <title> {% block pagetitle %}
+    /* ── FLASH MESSAGES ── */
+    .flash-wrap {
+      max-width: 1200px;
+      margin: 1rem auto 0;
+      padding: 0 2rem;
+    }
+    .flash {
+      padding: .75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: .5rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .flash.error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .flash.success { background: var(--green-pale); color: var(--green-mid); border: 1px solid #a7f3d0; }
+    .flash.warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
 
-        {% endblock pagetitle %}</title>
-    <style>
-        .bg {
+    /* ── MAIN ── */
+    main { flex: 1; }
 
-            background-image: url("images/background.jpeg");
+    /* ── FOOTER ── */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,.55);
+      text-align: center;
+      padding: 1.75rem 2rem;
+      font-size: .85rem;
+      margin-top: auto;
+    }
+    footer a { color: var(--green-light); text-decoration: none; }
+    footer strong { color: rgba(255,255,255,.85); }
 
-            height: 100%;
-
-            /* Center and scale the image nicely */
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-
-        .file-upload input[type='file'] {
-            display: none;
-        }
-
-        body {
-            background-color: #f4f14d;
-            /* background: -webkit-linear-gradient(to right, #66a776, #043610);
-            background: linear-gradient(to right, #5d9c6a, #059b0d); */
-            height: 100vh;
-        }
-
-        .rounded-lg {
-            border-radius: 1rem;
-        }
-
-        .custom-file-label.rounded-pill {
-            border-radius: 50rem;
-        }
-
-        .custom-file-label.rounded-pill::after {
-            border-radius: 0 50rem 50rem 0;
-        }
-
-        label {
-            background-color: rgb(2, 46, 15);
-            color: white;
-            padding: 0.5rem;
-            font-family: sans-serif;
-            border-radius: 0.3rem;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-
-        #file-chosen {
-            margin-left: 0.3rem;
-            font-family: sans-serif;
-        }
-
-        .footer-basic {
-            padding: 40px 0;
-            background-color: #042908;
-            color: #f1f3f5;
-        }
-
-        .footer-basic ul {
-            padding: 0;
-            list-style: none;
-            text-align: center;
-            font-size: 18px;
-            line-height: 1.6;
-            margin-bottom: 0;
-        }
-
-        .footer-basic li {
-            padding: 0 10px;
-        }
-
-        .footer-basic ul a {
-            color: inherit;
-            text-decoration: none;
-            opacity: 0.8;
-        }
-
-        .footer-basic ul a:hover {
-            opacity: 1;
-        }
-
-        .footer-basic .social {
-            text-align: center;
-            padding-bottom: 25px;
-        }
-
-        .footer-basic .social>a {
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            display: inline-block;
-            text-align: center;
-            border-radius: 50%;
-            border: 1px solid #ccc;
-            margin: 0 8px;
-            color: inherit;
-            opacity: 0.75;
-        }
-
-        .footer-basic .social>a:hover {
-            opacity: 0.9;
-        }
-
-        .footer-basic .copyright {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 0;
-        }
-    </style>
+    /* ── UTILS ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .6rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all .18s;
+    }
+    .btn-primary {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-outline {
+      background: transparent;
+      color: var(--green-main);
+      border: 1.5px solid var(--green-main);
+    }
+    .btn-outline:hover { background: var(--green-pale); }
+    .badge {
+      display: inline-block;
+      padding: .2rem .65rem;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .badge-green  { background: var(--green-pale); color: var(--green-mid); }
+    .badge-amber  { background: #fffbeb; color: #b45309; }
+    .badge-red    { background: #fef2f2; color: #b91c1c; }
+    .section-head {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--text-main);
+      margin-bottom: .35rem;
+      letter-spacing: -.02em;
+    }
+    .section-sub { color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .5s ease both; }
+  </style>
+  {% block extra_head %}{% endblock %}
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark " style="background-color:#05380b;">
-        <!-- <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button> -->
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
-                <li class="navbar-brand active">
-                    <a class="nav-link" href="/" style="color: white;">Home</a>
-                </li>
-                <li class="navbar-brand active">
-                    <a class="nav-link" href="/index" style="color: white;">AI Engine</a>
-                </li>
-                <li class="navbar-brand">
-                    <a class="nav-link" href="/market" style="color: white;">Supplements</a>
-                </li>
-                <li class="navbar-brand">
-                    <a class="nav-link" href="/contact" style="color: white;">Contact-Us</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    {% block body %}
 
-    {% endblock body %}
-    <div class="footer-basic">
-        <footer>
-            <center></center>
-            <br>
-            <ul class="list-inline">
-                <li class="list-inline-item"><a href="/">Home</a></li>
-                <li class="list-inline-item laptop"><a href="/index">AI Engine</a></li>
-            </ul>
-            <p class="copyright">Created for Exscel Design Project</p>
-        </footer>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">🌿 Plant<span>Guard</span> AI</a>
+    <div class="nav-links">
+      <a href="/"       {% if request.path == '/'       %}class="active"{% endif %}>Home</a>
+      <a href="/index"  {% if request.path == '/index'  %}class="active"{% endif %}>Diagnose</a>
+      <a href="/market" {% if request.path == '/market' %}class="active"{% endif %}>Market</a>
+      <a href="/history"{% if request.path == '/history'%}class="active"{% endif %}>History</a>
+      <a href="/contact"{% if request.path == '/contact'%}class="active"{% endif %}>Contact</a>
+      <a href="/index" class="btn nav-cta">Try Now →</a>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
-</body>
-<!-- <script>
-    if (window.matchMedia("(max-width: 767px)").matches)
-    {
-        // The viewport is less than 768 pixels wide
-        document.write("This is a mobile device.");
-        window.location.replace('/mobile-device');
+  </div>
+</nav>
 
-    } else {
-        
-        // The viewport is at least 768 pixels wide
-        document.write("This is a tablet or desktop.");
-    }
-</script> -->
-<!-- <script>
-    if(screen.width <= 700){
-        document.location = 'manthan2.html';
-    }
-</script> -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <p>Built by <strong>Nadimpalli Siddhartha Kumar Raju</strong> &nbsp;·&nbsp;
+     B.Tech CSE (Data Science), Kalasalingam Academy &nbsp;·&nbsp;
+     <a href="mailto:nskraju45@gmail.com">nskraju45@gmail.com</a>
+  </p>
+</footer>
+
+</body>
 </html>
